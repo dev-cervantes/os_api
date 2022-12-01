@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +17,8 @@ class Equipamento extends Model
     protected $visible = [
         "id_equipamento",
         "equipamento_codigo",
-        "descricao"
+        "descricao",
+        "itens"
     ];
 
     public function itens(): HasMany

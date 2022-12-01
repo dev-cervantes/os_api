@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,8 +19,18 @@ class OsProduto extends Model
         "qtd",
         "valorTotal",
         "id_os_equipamento_item",
-        "id_produto"
+        "id_produto",
+        "produto"
     ];
+
+    static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope("defaultRelations", function (Builder $builder) {
+            $builder->with("produto");
+        });
+    }
 
     public function produto(): BelongsTo
     {

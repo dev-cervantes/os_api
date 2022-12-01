@@ -15,21 +15,20 @@ abstract class Controller extends BaseController
 
     protected function sendResponse($data): JsonResponse
     {
-        $response = array(
+        $response = [
             'success' => true,
-            'count' => $data->count(),
             'data' => $data,
-        );
+        ];
 
         return response()->json($response);
     }
 
     protected function sendResponseError($error, $code = 404): JsonResponse
     {
-        $response = array(
-            'error' => false,
+        $response = [
+            'error' => true,
             'message' => $error,
-        );
+        ];
 
         if ($code == 0) $code = 500;
 

@@ -22,11 +22,10 @@ class OsController extends Controller
             $filtros = $validate->getData();
 
             $query = Os::query();
+            $query->whereBetween("data_hora", [$filtros['data_inicial'] ?? "0001-01-01", $filtros['data_final'] ?? "5000-12-30"]);
 
             if (isset($filtros['codigo']))
                 $query->where("os_codigo", "=", $filtros['codigo']);
-
-            $query->whereBetween("data_hora", [$filtros['data_inicial'] ?? "0001-01-01", $filtros['data_final'] ?? "5000-12-30"]);
 
             if (isset($filtros['situacao']))
                 $query->whereHas("situacao", fn ($q) => $q->where("situacao", "=", $filtros['situacao']));
@@ -34,7 +33,7 @@ class OsController extends Controller
             if (isset($filtros['cliente']))
                 $query->whereHas("cliente", fn ($q) => $q->where("nome", "=", $filtros['cliente']));
 
-            if (isset($filtros['equipamento']) || isset($filtros['equipamento_item']))
+            if (isset($filtros['equipamento']) || isset($filtros['equipamento_item'])) {
                 $query->whereHas(
                     "equipamentosItens",
                     function ($equipamentosItens) use ($filtros) {
@@ -47,6 +46,7 @@ class OsController extends Controller
                         });
                     }
                 );
+            }
 
             $data = $query->get();
 
@@ -67,15 +67,18 @@ class OsController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(int $id)
+    public function show(int $id): JsonResponse
     {
-        //
+        try {
+            $os = Os::allRelations()->find($id);
+
+            if (is_null($os))
+                return $this->sendResponseError("OS não encontrada.");
+
+            return $this->sendResponse($os);
+        } catch (Exception $e) {
+            return $this->sendResponseError($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
@@ -90,15 +93,15 @@ class OsController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(int $id)
+    public function destroy(int $id): JsonResponse
     {
-        //
+        $os = Os::find($id);
+        if (is_null($os))
+            return $this->sendResponseError("Os não encontrada!");
+
+        $os->delete();
+
+        return $this->sendResponse([]);
     }
 
     protected function rules(): array

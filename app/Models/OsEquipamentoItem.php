@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,15 @@ class OsEquipamentoItem extends Model
         "servicos",
         "produtos"
     ];
+
+    static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope("defaultRelations", function (Builder $builder) {
+            $builder->with(["equipamentoItem", "servicos", "produtos"]);
+        });
+    }
 
     public function equipamentoItem(): BelongsTo
     {
