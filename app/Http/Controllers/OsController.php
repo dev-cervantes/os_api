@@ -61,15 +61,47 @@ class OsController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        try {
+            $body = $request->all();
+
+            $validate = $this->validator($body, $this->rules(), $this->messages());
+            if ($validate->fails()) {
+                throw new Exception($validate->errors()->first(), 422);
+            }
+
+            DB::beginTransaction();
+
+            $data = $validate->getData();
+
+            $os = Os::create($data);
+
+            foreach ($data['equipamentos_itens'] as $equipamentoItens) {
+                $equipamentoItens['id_os'] = $os->id_os;
+                $osEquipamentoItens = OsEquipamentoItem::create($equipamentoItens);
+
+                foreach ($equipamentoItens['servicos'] as $servicos) {
+                    $servicos['id_os_equipamento_item'] = $osEquipamentoItens->id_os_equipamento_item;
+                    OsServico::create($servicos);
+                }
+
+                foreach ($equipamentoItens['produtos'] as $produtos) {
+                    $produtos['id_os_equipamento_item'] = $osEquipamentoItens->id_os_equipamento_item;
+                    OsProduto::create($produtos);
+                }
+            }
+
+            DB::commit();
+
+            $response = Os::allRelations()->find($os->id_os);
+
+            return $this->sendResponse($response);
+        } catch (Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
+            return $this->sendResponseError($e->getMessage(), $e->getCode());
+        }
     }
 
     public function show(int $id): JsonResponse

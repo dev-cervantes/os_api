@@ -16,4 +16,6 @@ class Produto extends Model
         "id_produto",
         "descricao"
     ];
+
+    public $timestamps = false;
 }

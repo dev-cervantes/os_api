@@ -20,4 +20,6 @@ class Usuario extends Model
         "login_usuario",
         "perfil"
     ];
+
+    public $timestamps = false;
 }

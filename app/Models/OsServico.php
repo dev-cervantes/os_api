@@ -14,6 +14,7 @@ class OsServico extends Model
     protected $table = "os_servico";
     protected $primaryKey = "id_os_servico";
 
+    protected $guarded = ["id_os_servico"];
     protected $visible = [
         "id_os_servico",
         "qtd",
@@ -30,6 +31,8 @@ class OsServico extends Model
     protected $casts = [
         "dataHora" => "datetime"
     ];
+
+    public $timestamps = false;
 
     static function boot()
     {

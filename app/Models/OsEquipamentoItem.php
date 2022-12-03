@@ -15,6 +15,7 @@ class OsEquipamentoItem extends Model
     protected $table = "os_equipamento_item";
     protected $primaryKey = "id_os_equipamento_item";
 
+    protected $guarded = ["id_os_equipamento_item"];
     protected $visible = [
         "id_os_equipamento_item",
         "problema_reclamado",
@@ -26,6 +27,8 @@ class OsEquipamentoItem extends Model
         "servicos",
         "produtos"
     ];
+
+    public $timestamps = false;
 
     static function boot()
     {

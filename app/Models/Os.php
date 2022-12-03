@@ -15,6 +15,7 @@ class Os extends Model
     protected $table = "os";
     protected $primaryKey = "id_os";
 
+    protected $guarded = ["id_os"];
     protected $visible = [
         "id_os",
         "os_codigo",
@@ -35,13 +36,14 @@ class Os extends Model
         "id_usuario_atendente",
         "id_usuario_aprovacao",
         "id_usuario_encerramento",
+        "responsavel",
         "situacao",
         "tipoAtendimento",
         "cliente",
         "usuarioAtendente",
         "usuarioAprovacao",
         "usuarioEncerramento",
-        "equipamentosItens",
+        "equipamentosItens"
     ];
 
     protected $casts = [
@@ -51,6 +53,8 @@ class Os extends Model
         "data_hora_aprovacao" => "datetime",
         "data_hora_encerramento" => "datetime"
     ];
+
+    public $timestamps = false;
 
     static function boot()
     {

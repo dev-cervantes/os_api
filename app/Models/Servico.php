@@ -18,4 +18,6 @@ class Servico extends Model
         "descricao",
         "preco_venda"
     ];
+
+    public $timestamps = false;
 }

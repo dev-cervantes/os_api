@@ -16,4 +16,6 @@ class OsTipoAtendimento extends Model
         "id_os_tipo_atendimento",
         "tipo_atendimento"
     ];
+
+    public $timestamps = false;
 }

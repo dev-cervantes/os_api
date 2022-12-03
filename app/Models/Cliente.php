@@ -12,6 +12,7 @@ class Cliente extends Model
 
     protected $table = "cliente";
     protected $primaryKey = "id_cliente";
+    public $timestamps = false;
 
     protected $visible = [
         "id_cliente",

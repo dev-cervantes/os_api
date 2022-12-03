@@ -14,6 +14,7 @@ class OsProduto extends Model
     protected $table = "os_produto";
     protected $primaryKey = "id_os_produto";
 
+    protected $guarded = ["id_os_produto"];
     protected $visible = [
         "id_os_produto",
         "qtd",
@@ -22,6 +23,8 @@ class OsProduto extends Model
         "id_produto",
         "produto"
     ];
+
+    public $timestamps = false;
 
     static function boot()
     {

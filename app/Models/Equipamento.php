@@ -21,6 +21,8 @@ class Equipamento extends Model
         "itens"
     ];
 
+    public $timestamps = false;
+
     public function itens(): HasMany
     {
         return $this->hasMany(EquipamentoItem::class, "id_equipamento", "id_equipamento");

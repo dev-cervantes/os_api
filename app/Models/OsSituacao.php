@@ -17,4 +17,6 @@ class OsSituacao extends Model
         "situacao",
         "aprovada"
     ];
+
+    public $timestamps = false;
 }

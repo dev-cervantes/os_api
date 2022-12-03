@@ -22,6 +22,8 @@ class EquipamentoItem extends Model
         "equipamento"
     ];
 
+    public $timestamps = false;
+
     static function boot()
     {
         parent::boot();
