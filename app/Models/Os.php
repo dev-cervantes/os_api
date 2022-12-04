@@ -90,6 +90,11 @@ class Os extends Model
         return $this->belongsTo(Usuario::class, "id_usuario_aprovacao", "id_usuario");
     }
 
+    public function responsavel(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, "id_usuario_responsavel", "id_usuario");
+    }
+
     public function usuarioEncerramento(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, "id_usuario_encerramento", "id_usuario");
@@ -108,6 +113,7 @@ class Os extends Model
             "cliente",
             "usuarioAtendente",
             "usuarioAprovacao",
+            "responsavel",
             "usuarioEncerramento",
             "equipamentosItens"
         ]);

@@ -25,21 +25,21 @@ class OsUsuarioResponsavel extends Model
 
     public $timestamps = false;
 
-    public static function getResponsavel(int $idOs): string | null
-    {
-        $result = @DB::select(
-            DB::raw("
-                select
-                    os_usuario_responsavel_log.*,
-                    usuario.nome
-                from os_usuario_responsavel_log
-                inner join usuario on REPLACE(usuario_utilizado, 'u_', '')::bigint = usuario.id_usuario
-                where id_os = :id_os
-                limit 1;
-            "),
-            [$idOs]
-        )[0];
-
-        return @$result->nome;
-    }
+//    public static function getResponsavel(int $idOs): string | null
+//    {
+//        $result = @DB::select(
+//            DB::raw("
+//                select
+//                    os_usuario_responsavel_log.*,
+//                    usuario.nome
+//                from os_usuario_responsavel_log
+//                inner join usuario on REPLACE(usuario_utilizado, 'u_', '')::bigint = usuario.id_usuario
+//                where id_os = :id_os
+//                limit 1;
+//            "),
+//            [$idOs]
+//        )[0];
+//
+//        return @$result->nome;
+//    }
 }

@@ -6,7 +6,7 @@ use App\Models\Os;
 use App\Models\OsEquipamentoItem;
 use App\Models\OsProduto;
 use App\Models\OsServico;
-use App\Models\OsUsuarioResponsavel;
+use App\Models\OsSituacao;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -75,6 +75,8 @@ class OsController extends Controller
 
             $data = $validate->getData();
 
+            $this->validar($data);
+
             $os = Os::create($data);
 
             foreach ($data['equipamentos_itens'] as $equipamentoItens) {
@@ -99,7 +101,6 @@ class OsController extends Controller
             return $this->sendResponse($response);
         } catch (Exception $e) {
             DB::rollBack();
-            dd($e->getMessage());
             return $this->sendResponseError($e->getMessage(), $e->getCode());
         }
     }
@@ -118,16 +119,132 @@ class OsController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, int $id)
+
+    public function update(Request $request, int $id): JsonResponse
     {
-        //
+        try {
+            $body = $request->all();
+
+            $validate = $this->validator($body, $this->rules(), $this->messages());
+            if ($validate->fails()) {
+                throw new Exception($validate->errors()->first(), 422);
+            }
+
+            $data = $validate->getData();
+
+            $this->validar($data);
+
+            DB::beginTransaction();
+
+            $os = Os::allRelations()->find($id);
+            if (is_null($os)) {
+                throw new Exception("OS não encontrada!");
+            }
+
+            $osEquipamentosItens = $os->equipamentosItens;
+
+            $os->fill($data);
+            $os->save();
+
+            //Salva os novos equipamentos itens.
+            foreach ($data['equipamentos_itens'] as $reqEquipamentoItem) {
+                if (!isset($reqEquipamentoItem['id_os_equipamento_item'])) {
+                    $osEquipamentoItem = OsEquipamentoItem::create($reqEquipamentoItem);
+
+                    foreach ($reqEquipamentoItem['servicos'] as $servicos) {
+                        $servicos['id_os_equipamento_item'] = $osEquipamentoItem->id_os_equipamento_item;
+                        OsServico::create($servicos);
+                    }
+
+                    foreach ($reqEquipamentoItem['produtos'] as $produtos) {
+                        $produtos['id_os_equipamento_item'] = $osEquipamentoItem->id_os_equipamento_item;
+                        OsProduto::create($produtos);
+                    }
+                }
+            }
+
+            //Verifica os equipamentos itens para atualizar ou deletar.
+            foreach ($osEquipamentosItens as $osEquipamentoItem) {
+                $existe = false;
+
+                //Percorre os equipamentos contidos na request.
+                foreach ($data['equipamentos_itens'] as $reqEquipamentoItem) {
+                    if ($osEquipamentoItem->id_os_equipamento_item == @$reqEquipamentoItem['id_os_equipamento_item']) {
+                        $existe = true;
+
+                        //Percorre os serviços verificando se tem algum novo para inserir no devido equipamento.
+                        foreach ($reqEquipamentoItem['servicos'] as $reqServicos) {
+                            if (!isset($reqServicos['id_os_servico'])) {
+                                $reqServicos['id_os_equipamento_item'] = $osEquipamentoItem->id_os_equipamento_item;
+                                OsServico::create($reqServicos);
+                            }
+                        }
+
+                        //Percorre os serviços verificando se tem algum novo para inserir no devido equipamento.
+                        foreach ($reqEquipamentoItem['produtos'] as $reqProdutos) {
+                            if (!isset($reqProdutos['id_os_servico'])) {
+                                $reqProdutos['id_os_equipamento_item'] = $osEquipamentoItem->id_os_equipamento_item;
+                                OsServico::create($reqProdutos);
+                            }
+                        }
+
+                        //Verifica os serviços para atualizar ou deletar.
+                        foreach ($osEquipamentoItem->servicos as $osServico) {
+                            $existeServico = false;
+
+                            //Percorre os serviços contidos na request.
+                            foreach ($reqEquipamentoItem['servicos'] as $reqServicos) {
+                                if ($osServico->id_os_servico == @$reqEquipamentoItem['id_os_servico']) {
+                                    $existeServico = true;
+
+                                    $osServico->fill($reqServicos);
+                                    $osServico->save();
+                                }
+                            }
+
+                            if (!$existeServico) {
+                                $osServico->delete();
+                            }
+                        }
+
+                        //Verifica os produtos para atualizar ou deletar.
+                        foreach ($osEquipamentoItem->produtos as $osProduto) {
+                            $existeProduto = false;
+
+                            //Percorre os produtos contidos na request.
+                            foreach ($reqEquipamentoItem['produtos'] as $reqProduto) {
+                                if ($osProduto->id_os_servico == @$reqEquipamentoItem['id_os_produto']) {
+                                    $existeProduto = true;
+
+                                    $osProduto->fill($reqProduto);
+                                    $osProduto->save();
+                                }
+                            }
+
+                            if (!$existeProduto) {
+                                $osProduto->delete();
+                            }
+                        }
+
+                        $osEquipamentoItem->fill($reqEquipamentoItem);
+                        $osEquipamentoItem->save();
+                    }
+                }
+
+                if (!$existe) {
+                    $osEquipamentoItem->delete();
+                }
+            }
+
+            DB::commit();
+
+            $os = Os::allRelations()->find($id);
+
+            return $this->sendResponse($os);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendResponseError($e->getMessage(), $e->getCode());
+        }
     }
 
     public function destroy(int $id): JsonResponse
@@ -149,11 +266,24 @@ class OsController extends Controller
             if (is_null($os))
                 return $this->sendResponseError("OS não encontrada.");
 
-            $os->responsavel = OsUsuarioResponsavel::getResponsavel($os->id_os);
-
             return $this->sendResponse($os);
         } catch (Exception $e) {
             return $this->sendResponseError($e->getMessage(), $e->getCode());
+        }
+    }
+
+    protected function validar($data)
+    {
+        if (empty($data['equipamentos_itens'])) {
+            if (!isset($data['id_os_situacao']))
+                throw new Exception("Situação não informada.");
+
+            $situacao = OsSituacao::find($data);
+            if (is_null($situacao))
+                throw new Exception("Situação não encontrada.");
+
+            if (!$situacao->aprovada)
+                throw new Exception("OS deve possuir no mínio 1 serviço ou 1 produto.");
         }
     }
 
