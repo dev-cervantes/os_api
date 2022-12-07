@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +13,7 @@ class Equipamento extends Model
     protected $table = "equipamento";
     protected $primaryKey = "id_equipamento";
 
+    protected $guarded = ["id_equipamento"];
     protected $visible = [
         "id_equipamento",
         "equipamento_codigo",

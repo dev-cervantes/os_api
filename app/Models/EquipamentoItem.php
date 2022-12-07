@@ -14,6 +14,7 @@ class EquipamentoItem extends Model
     protected $table = "equipamento_item";
     protected $primaryKey = "id_equipamento_item";
 
+    protected $guarded = ["id_equipamento_item"];
     protected $visible = [
         "id_equipamento_item",
         "identificador",
@@ -22,13 +23,14 @@ class EquipamentoItem extends Model
         "equipamento"
     ];
 
+    public const scopeEquipamentoRelation = "equipamento";
     public $timestamps = false;
 
     static function boot()
     {
         parent::boot();
 
-        static::addGlobalScope("defaultRelations", function (Builder $builder) {
+        static::addGlobalScope(self::scopeEquipamentoRelation, function (Builder $builder) {
             $builder->with("equipamento");
         });
     }
