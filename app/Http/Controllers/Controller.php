@@ -40,6 +40,12 @@ abstract class Controller extends BaseController
         return Validator::make($data, $rules, $messages, $customAttributes);
     }
 
-    abstract protected function rules();
-    abstract protected function messages();
+    protected function rules(): array
+    {
+        return [];
+    }
+
+    protected function messages(): array {
+        return [];
+    }
 }

@@ -119,7 +119,6 @@ class OsController extends Controller
         }
     }
 
-
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -319,7 +318,7 @@ class OsController extends Controller
         ];
     }
 
-    protected function messages()
+    protected function messages(): array
     {
         return [
             "id_os_situacao.integer" => "Situação inválida.",
