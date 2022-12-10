@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
 class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
@@ -19,12 +20,12 @@ class AuthController extends Controller
                 throw new Exception($validate->errors()->first(), 422);
             }
 
-            $token = Auth::attempt($credenciais);
+            $token = auth()->attempt($credenciais);
             if (!$token) {
                 throw new Exception("Não autorizado.", 401);
             }
 
-            $user = Auth::user();
+            $user = auth()->user();
             return $this->sendResponse([
                 "user" => $user,
                 "access_token" => $token
@@ -36,14 +37,22 @@ class AuthController extends Controller
 
     public function logout(): JsonResponse
     {
-        Auth::logout();
-        return $this->sendResponse([]);
+        try {
+            auth()->logout();
+            return $this->sendResponse([]);
+        } catch (Exception $e) {
+            return $this->sendResponse([]);
+        }
     }
 
     public function refreshToken(): JsonResponse
     {
-        $token = Auth::refresh();
-        return $this->sendResponse(["refresh_token" => $token]);
+        try {
+            $token = auth()->refresh();
+            return $this->sendResponse(["refresh_token" => $token]);
+        } catch (Exception $e) {
+            return $this->sendResponseError($e->getMessage(), 401);
+        }
     }
 
     protected function rules(): array

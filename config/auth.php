@@ -38,10 +38,6 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
         'api' => [
             'driver' => 'jwt',
             'provider' => 'users',
@@ -75,11 +71,6 @@ return [
             'driver' => 'customUserProvider',
             'model' => Usuario::class
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*

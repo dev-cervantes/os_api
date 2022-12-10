@@ -12,7 +12,7 @@ class ValidateSecretIsValid
         $headers = $request->header();
 
         if (!isset($headers['secret']) || $headers['secret'][0] != env('APP_SECRET')) {
-            abort(403, "Sem acesso");
+            abort(403, "Sem acesso.");
         }
 
         return $next($request);

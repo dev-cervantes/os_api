@@ -17,22 +17,17 @@ class Usuario extends Authenticatable implements JWTSubject
 
     protected $visible = [
         "id_usuario",
-        "nome",
         "login_usuario",
-        "perfil"
+        "perfil",
+        "inativo",
+        "nome",
+        "acesso_os",
+        "login_habilitado",
     ];
 
-    public $timestamps = false;
-
-    public function getAuthIdentifier()
-    {
-        return $this->login_usuario;
-    }
-
-    public function getAuthIdentifierName()
-    {
-        return "login_usuario";
-    }
+    protected $hidden = [
+        "senha",
+    ];
 
     public function getAuthPassword()
     {
