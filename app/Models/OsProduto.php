@@ -18,7 +18,7 @@ class OsProduto extends Model
     protected $visible = [
         "id_os_produto",
         "qtd",
-        "valorTotal",
+        "valor_total",
         "id_os_equipamento_item",
         "id_produto",
         "produto"

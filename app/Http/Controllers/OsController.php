@@ -14,10 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class OsController extends Controller
 {
+    const PAGINATOR_PER_PAGE_DEFAULT = 100;
+
     public function index(Request $request): JsonResponse
     {
         try {
-            $body = $request->all();
+            $body = $request->except(['per_page', 'page']);
+            $queryParams = $request->only(['per_page', 'page']);
 
             $validate = $this->validator($body, $this->rulesFiltros(), $this->messagesFiltros());
             if ($validate->fails()) {
@@ -27,13 +30,18 @@ class OsController extends Controller
             $filtros = $validate->getData();
 
             $query = Os::query();
-            $query->whereBetween("data_hora", [$filtros['data_inicial'] ?? "0001-01-01", $filtros['data_final'] ?? "5000-12-30"]);
+
+            if (isset($filtros['data_inicial']))
+                $query->where("data_hora", ">=", $filtros['data_inicial']);
+
+            if (isset($filtros['data_final']))
+                $query->where("data_hora", "<=", $filtros['data_final']);
 
             if (isset($filtros['codigo']))
                 $query->where("os_codigo", "=", $filtros['codigo']);
 
             if (isset($filtros['situacao']))
-                $query->whereHas("situacao", fn ($q) => $q->where("situacao", "=", $filtros['situacao']));
+                $query->where("id_os_situacao", "=", $filtros['situacao']);
 
             if (isset($filtros['cliente']))
                 $query->whereHas("cliente", fn ($q) => $q->where("nome", "=", $filtros['cliente']));
@@ -44,16 +52,20 @@ class OsController extends Controller
                     function ($equipamentosItens) use ($filtros) {
                         $equipamentosItens->whereHas("equipamentoItem", function ($equipamentoItem) use ($filtros) {
                             if (isset($filtros['equipamento_item']))
-                                $equipamentoItem->where("identificador", "=", $filtros['equipamento_item']);
+                                $equipamentoItem->where("id_equipamento_item", "=", $filtros['equipamento_item']);
+//                                $equipamentoItem->where("identificador", "=", $filtros['equipamento_item']);
 
                             if (isset($filtros['equipamento']))
-                                $equipamentoItem->whereHas("equipamento", fn ($equipamento) => $equipamento->where("descricao", "=", $filtros['equipamento']));
+                                $equipamentoItem->whereHas("equipamento", fn ($equipamento) => $equipamento->where("id_equipamento", "=", $filtros['equipamento']));
+//                                $equipamentoItem->whereHas("equipamento", fn ($equipamento) => $equipamento->where("descricao", "=", $filtros['equipamento']));
                         });
                     }
                 );
             }
 
-            $data = $query->get();
+            $query->orderBy("os_codigo", "desc");
+
+            $data = $query->paginate(@$queryParams['per_page'] ?? self::PAGINATOR_PER_PAGE_DEFAULT);
 
             return $this->sendResponse($data);
         } catch (Exception $e) {
@@ -353,8 +365,8 @@ class OsController extends Controller
     protected function rulesFiltros(): array
     {
         return [
-            "data_inicial" => "date_format:Y-m-d|nullable",
-            "data_final" => "date_format:Y-m-d|nullable|after_or_equal:data_inicial",
+            "data_inicial" => "date_format:Y-m-d\TH:i:s.u|nullable",
+            "data_final" => "date_format:Y-m-d\TH:i:s.u|nullable|after_or_equal:data_inicial",
             "codigo" => "integer|nullable",
             "situacao" => "string|nullable",
             "cliente" => "string|nullable",
@@ -363,7 +375,7 @@ class OsController extends Controller
         ];
     }
 
-    protected function messagesFiltros()
+    protected function messagesFiltros(): array
     {
         return [
             "date_format" => "Data é inválida.",

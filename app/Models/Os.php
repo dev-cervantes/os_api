@@ -61,7 +61,7 @@ class Os extends Model
         parent::boot();
 
         static::addGlobalScope('defaultRelations', function (Builder $builder) {
-            $builder->with(["situacao", "tipoAtendimento", "cliente"]);
+            $builder->with(["situacao", "equipamentosItens", "cliente"]);
         });
     }
 
