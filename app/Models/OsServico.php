@@ -18,9 +18,9 @@ class OsServico extends Model
     protected $visible = [
         "id_os_servico",
         "qtd",
-        "valorTotal",
-        "descricaoInformada",
-        "dataHora",
+        "valor_total",
+        "descricao_informada",
+        "data_hora",
         "id_os_equipamento_item",
         "id_servico",
         "id_usuario",
