@@ -7,6 +7,7 @@ use App\Http\Controllers\OsSituacaoController;
 use App\Http\Controllers\OsTipoAtendimentoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ServicoController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Middleware\ValidateSecretIsValid;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +27,6 @@ Route::middleware([ValidateSecretIsValid::class])->group(function () {
         Route::apiResource("equipamento", EquipamentoController::class)->only(["index", "store"]);
         Route::apiResource("servico", ServicoController::class)->only(["index"]);
         Route::apiResource("produto", ProdutoController::class)->only(["index"]);
+        Route::apiResource("usuario", UsuarioController::class)->only(["index"]);
     });
 });
