@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\OsController;
 use App\Http\Controllers\OsSituacaoController;
@@ -28,5 +29,6 @@ Route::middleware([ValidateSecretIsValid::class])->group(function () {
         Route::apiResource("servico", ServicoController::class)->only(["index"]);
         Route::apiResource("produto", ProdutoController::class)->only(["index"]);
         Route::apiResource("usuario", UsuarioController::class)->only(["index"]);
+        Route::get("cliente/contains-name", [ClienteController::class, "containsName"]);
     });
 });
