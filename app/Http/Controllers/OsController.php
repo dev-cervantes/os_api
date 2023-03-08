@@ -86,6 +86,7 @@ class OsController extends Controller
             DB::beginTransaction();
 
             $data = $validate->getData();
+            unset($data['os_codigo']);
 
             $this->validar($data);
 
