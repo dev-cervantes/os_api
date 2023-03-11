@@ -35,7 +35,11 @@ class OsEquipamentoItem extends Model
         parent::boot();
 
         static::addGlobalScope("defaultRelations", function (Builder $builder) {
-            $builder->with(["equipamentoItem", "servicos", "produtos"]);
+            $builder->with([
+                "equipamentoItem",
+                "servicos" => fn ($query) => $query->orderBy('data_hora', 'asc'),
+                "produtos"
+            ]);
         });
     }
 

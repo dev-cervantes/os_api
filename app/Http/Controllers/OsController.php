@@ -206,7 +206,7 @@ class OsController extends Controller
 
                             //Percorre os serviços contidos na request.
                             foreach ($reqEquipamentoItem['servicos'] as $reqServicos) {
-                                if ($osServico->id_os_servico == @$reqEquipamentoItem['id_os_servico']) {
+                                if ($osServico->id_os_servico == @$reqServicos['id_os_servico']) {
                                     $existeServico = true;
 
                                     $osServico->fill($reqServicos);
