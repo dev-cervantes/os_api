@@ -15,7 +15,7 @@ class OsSituacaoController extends Controller
             $config = ConfigOs::query()->first();
             $situacoes = OsSituacao::query()->orderBy("situacao")->get();
 
-            $situacoes->each(fn ($it) => $it->encerrado = $it->id_os_situacao == $config->id_os_situacao_encerrada);
+            $situacoes->map(fn ($it) => $it->encerrada = $it->id_os_situacao == $config->id_os_situacao_encerrada);
 
             return $this->sendResponse($situacoes);
         } catch (Exception $e) {

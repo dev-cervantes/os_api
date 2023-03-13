@@ -15,7 +15,8 @@ class OsSituacao extends Model
     protected $visible = [
         "id_os_situacao",
         "situacao",
-        "aprovada"
+        "aprovada",
+        "encerrada"
     ];
 
     public $timestamps = false;
