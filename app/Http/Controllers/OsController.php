@@ -46,6 +46,9 @@ class OsController extends Controller
             if (isset($filtros['cliente']))
                 $query->whereHas("cliente", fn ($q) => $q->where("nome", "=", $filtros['cliente']));
 
+            if (isset($filtros['responsavel']))
+                $query->whereHas("responsavel", fn ($q) => $q->where("nome", "=", $filtros['responsavel']));
+
             if (isset($filtros['equipamento']) || isset($filtros['equipamento_item'])) {
                 $query->whereHas(
                     "equipamentosItens",
@@ -370,6 +373,7 @@ class OsController extends Controller
             "codigo" => "integer|nullable",
             "situacao" => "string|nullable",
             "cliente" => "string|nullable",
+            "responsavel" => "string|nullable",
             "equipamento" => "string|nullable",
             "equipamento_item" => "string|nullable"
         ];
@@ -383,6 +387,7 @@ class OsController extends Controller
             "codigo.string" => "Código da OS é inválido.",
             "situacao.string" => "Situação da OS é inválida.",
             "cliente.string" => "Cliente inválido.",
+            "responsavel.string" => "Responsável inválido.",
             "equipamento.string" => "Equipamento inválido.",
             "equipamento_item.string" => "Identificador inválido."
         ];

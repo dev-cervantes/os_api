@@ -33,6 +33,7 @@ class Os extends Model
         "id_os_situacao",
         "id_os_tipo_atendimento",
         "id_cliente",
+        "id_usuario_responsavel",
         "id_usuario_atendente",
         "id_usuario_aprovacao",
         "id_usuario_encerramento",
