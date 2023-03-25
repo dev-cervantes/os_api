@@ -31,7 +31,7 @@ class OsProduto extends Model
         parent::boot();
 
         static::addGlobalScope("defaultRelations", function (Builder $builder) {
-            $builder->with("produto");
+            $builder->with("produto", fn ($query) => $query->withoutGlobalScope(Produto::scopeWhereNotInativo));
         });
     }
 
