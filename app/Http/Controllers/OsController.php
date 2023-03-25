@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConfigOs;
 use App\Models\Os;
 use App\Models\OsEquipamentoItem;
 use App\Models\OsProduto;
@@ -40,8 +41,12 @@ class OsController extends Controller
             if (isset($filtros['codigo']))
                 $query->where("os_codigo", "=", $filtros['codigo']);
 
-            if (isset($filtros['situacao']))
+            if (isset($filtros['situacao_em_aberto']) && $filtros['situacao_em_aberto']) {
+                $config = ConfigOs::query()->first();
+                $query->where("id_os_situacao", "<>", $config->id_os_situacao_encerrada);
+            } else if (isset($filtros['situacao'])) {
                 $query->where("id_os_situacao", "=", $filtros['situacao']);
+            }
 
             if (isset($filtros['cliente']))
                 $query->whereHas("cliente", fn ($q) => $q->where("nome", "=", $filtros['cliente']));
