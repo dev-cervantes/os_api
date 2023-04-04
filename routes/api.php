@@ -29,7 +29,7 @@ Route::middleware([ValidateSecretIsValid::class])->group(function () {
         Route::apiResource("servico", ServicoController::class)->only(["index"]);
         Route::apiResource("produto", ProdutoController::class)->only(["index"]);
         Route::apiResource("usuario", UsuarioController::class)->only(["index"]);
-        Route::apiResource("cliente", ClienteController::class)->only(["show"]);
         Route::get("cliente/contains-name", [ClienteController::class, "containsName"]);
+        Route::apiResource("cliente", ClienteController::class)->only(["show"]);
     });
 });
