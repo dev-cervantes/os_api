@@ -6,16 +6,5 @@ services:
             dockerfile: docker/php-fpm/Dockerfile
         ports:
             - '9000:8000'
-        environment:
-            - APP_DEBUG=false
-            - APP_SECRET=eThWmZq4t7w!z%C*F-JaNcRfUjXn2r5u8x/A?D(G+KbPeSgVkYp3s6v9y$B&E)H@
-            - DB_CONNECTION=pgsql
-            - DB_HOST=10.0.0.250
-            - DB_PORT=5432
-            - DB_DATABASE=LinkDB_Cervantes
-            - DB_USERNAME=postgres
-            - DB_PASSWORD=cer_2011!
-            - JWT_SECRET=y7hwnNtykcssoYUzGeUSTPPPchoBc3uugmenDcUwwEGj5LvkJSkdoeUnEAKosgNL
-            - JWT_ALGO=HS256
         volumes:
             - ./:/var/www/html/api

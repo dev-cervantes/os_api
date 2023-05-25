@@ -21,11 +21,10 @@ RUN chown -R www-data:www-data /var/www/html/api/storage
 RUN chmod -R 775 /var/www/html/api/storage
 
 # Copia o arquivo de exemplo do ambiente Laravel
-COPY ../../.env.example /var/www/html/api/.env
+COPY ../../.env /var/www/html/api/.env
 
 # Gera a chave do Laravel
 RUN composer install
-RUN php artisan key:generate
 
 # Exponha a porta do PHP-FPM
 EXPOSE 8000
