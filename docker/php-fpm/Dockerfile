@@ -24,6 +24,7 @@ RUN chmod -R 775 /var/www/html/api/storage
 COPY ../../.env.example /var/www/html/api/.env
 
 # Gera a chave do Laravel
+RUN composer install
 RUN php artisan key:generate
 
 # Exponha a porta do PHP-FPM
