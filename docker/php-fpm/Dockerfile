@@ -30,4 +30,4 @@ RUN composer install
 EXPOSE 8000
 
 # Inicia o PHP-FPM e o serviço Laravel
-CMD cd /var/www/html/api && php artisan serve --host 0.0.0.0 --port 8000
+CMD cd /var/www/html/api && php artisan cache:clear && php artisan optimize && php artisan serve --host 0.0.0.0 --port 8000
