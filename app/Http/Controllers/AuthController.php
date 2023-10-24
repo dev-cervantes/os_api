@@ -2,72 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\Auth\TokenRefreshedResource;
+use App\Http\Resources\Auth\UserAuthenticatedResource;
+use App\Http\Resources\Auth\UserLoggedResource;
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    /**
+     * @throws Exception
+     */
+    public function login(LoginRequest $request): UserAuthenticatedResource
     {
-        try {
-            $credenciais = $request->only("login_usuario", "senha");
+        $token = auth()->attempt($request->all());
 
-            $validate = $this->validator($credenciais, $this->rules(), $this->messages());
-            if ($validate->fails()) {
-                throw new Exception($validate->errors()->first(), 422);
-            }
+        if (!$token)
+            throw new BadRequestException("Não autorizado.", 401);
 
-            $token = auth()->attempt($credenciais);
-            if (!$token) {
-                throw new Exception("Não autorizado.", 401);
-            }
-
-            $user = auth()->user();
-            return $this->sendResponse([
-                "user" => $user,
-                "access_token" => $token
-            ]);
-        } catch (Exception $e) {
-            return $this->sendResponseError($e->getMessage(), $e->getCode());
-        }
+        return new UserAuthenticatedResource(
+            usuario: auth()->user(),
+            token: $token
+        );
     }
 
-    public function logout(): JsonResponse
+    public function logout(): UserLoggedResource
     {
-        try {
-            auth()->logout();
-            return $this->sendResponse([]);
-        } catch (Exception $e) {
-            return $this->sendResponse([]);
-        }
+        auth()->logout();
+
+        return new UserLoggedResource();
     }
 
-    public function refreshToken(): JsonResponse
+    public function refreshToken(): TokenRefreshedResource
     {
-        try {
-            $token = auth()->refresh();
-            return $this->sendResponse(["refresh_token" => $token]);
-        } catch (Exception $e) {
-            return $this->sendResponseError($e->getMessage(), 401);
-        }
-    }
+        $token = auth()->refresh();
 
-    protected function rules(): array
-    {
-        return [
-            "login_usuario" => "required",
-            "senha" => "required"
-        ];
-    }
-
-    protected function messages(): array
-    {
-        return [
-            "login_usuario" => "Nome de usuário não informado.",
-            "senha" => "Senha não informada."
-        ];
+        return new TokenRefreshedResource(token: $token);
     }
 }

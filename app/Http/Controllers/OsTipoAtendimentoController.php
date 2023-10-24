@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OsTipoAtendimento\OsTipoAtendimentoCollectionResource;
 use App\Models\OsTipoAtendimento;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class OsTipoAtendimentoController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(): OsTipoAtendimentoCollectionResource
     {
-        try {
-            $tiposAtendimento = OsTipoAtendimento::query()->orderBy("tipo_atendimento")->get();
-            return $this->sendResponse($tiposAtendimento);
-        } catch (Exception $e) {
-            return $this->sendResponseError($e->getMessage(), $e->getCode());
-        }
+        return new OsTipoAtendimentoCollectionResource(
+            resource: Cache::remember(
+                key: "osTipoAtendimento_index",
+                ttl: 60 * 5, // 5 minutos,
+                callback: fn() => OsTipoAtendimento::query()->orderBy("tipo_atendimento")->get()
+            )
+        );
     }
 }

@@ -2,43 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Cliente\ContainsNameRequest;
+use App\Http\Resources\Cliente\ClienteCollectionResource;
+use App\Http\Resources\Cliente\ClienteResource;
 use App\Models\Cliente;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class ClienteController extends Controller
 {
-    public function show(int $id): JsonResponse
+    public function show(int $id): ClienteResource
     {
-        try {
-            $cliente = Cliente::find($id);
-
-            if (is_null($cliente))
-                return $this->sendResponseError("Cliente não encontrado.");
-
-            return $this->sendResponse($cliente);
-        } catch (Exception $e) {
-            return $this->sendResponseError($e->getMessage(), $e->getCode());
-        }
+        return new ClienteResource(
+            resource: Cliente::query()->find($id) ?? throw new BadRequestException("Cliente não encontrado.", 404)
+        );
     }
 
-    public function containsName(Request $request): JsonResponse
+    public function containsName(ContainsNameRequest $request): ClienteCollectionResource
     {
-        try {
-            $queryParams = $request->only(['name']);
-
-            if (empty($queryParams['name']))
-                return $this->sendResponse([]);
-
-            $clientes = Cliente::query()
-                ->where('nome', 'ilike', "%{$queryParams['name']}%")
-                ->orderBy("nome")
-                ->limit(30)
-                ->get();
-            return $this->sendResponse($clientes);
-        } catch (Exception $e) {
-            return $this->sendResponseError($e->getMessage(), $e->getCode());
+        if (!$request->has('name')) {
+            return new ClienteCollectionResource([]);
         }
+
+        return new ClienteCollectionResource(
+            resource: Cliente::query()
+                ->where('nome', 'ilike', "%{$request->get('name')}%")
+                ->orderBy('nome')
+                ->limit(30)
+                ->get()
+        );
     }
 }
