@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -43,8 +47,22 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->renderable(function (ValidationException $e, Request $request) {
+            if ($request->is("api/*")) {
+                return response()->json([
+                    "error" => true,
+                    "message" => $e->getMessage()
+                ], 422);
+            }
+        });
+
+        $this->renderable(function (BadRequestException $e, Request $request) {
+            if ($request->is("api/*")) {
+                return response()->json([
+                    "error" => true,
+                    "message" => $e->getMessage()
+                ], $e->getCode() ?? 404);
+            }
         });
     }
 }

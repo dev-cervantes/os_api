@@ -12,40 +12,4 @@ use Illuminate\Support\Facades\Validator;
 abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
-    protected function sendResponse($data): JsonResponse
-    {
-        $response = [
-            'success' => true,
-            'data' => $data,
-        ];
-
-        return response()->json($response);
-    }
-
-    protected function sendResponseError($error, $code = 404): JsonResponse
-    {
-        $response = [
-            'error' => true,
-            'message' => $error,
-        ];
-
-        if ($code == 0) $code = 500;
-
-        return response()->json($response, $code);
-    }
-
-    protected function validator(array $data, array $rules, array $messages = [], array $customAttributes = [])
-    {
-        return Validator::make($data, $rules, $messages, $customAttributes);
-    }
-
-    protected function rules(): array
-    {
-        return [];
-    }
-
-    protected function messages(): array {
-        return [];
-    }
 }

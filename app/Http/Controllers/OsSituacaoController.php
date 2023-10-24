@@ -2,24 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OsSituacao\SituacoesCollectionResource;
 use App\Models\ConfigOs;
 use App\Models\OsSituacao;
-use Exception;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class OsSituacaoController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(): SituacoesCollectionResource
     {
-        try {
-            $config = ConfigOs::query()->first();
-            $situacoes = OsSituacao::query()->orderBy("situacao")->get();
+        $situacoes = Cache::remember(
+            key: "osSituacao_index",
+            ttl: 60 * 5, // 5 minutos,
+            callback: function () {
+                $config = ConfigOs::query()->first();
 
-            $situacoes->map(fn ($it) => $it->encerrada = $it->id_os_situacao == $config->id_os_situacao_encerrada);
+                return OsSituacao::query()->orderBy("situacao")->get()
+                    ->map(function ($it) use ($config) {
+                        $it->encerrada = $it->id_os_situacao == $config->id_os_situacao_encerrada;
+                        return $it;
+                    });
+            }
+        );
 
-            return $this->sendResponse($situacoes);
-        } catch (Exception $e) {
-            return $this->sendResponseError($e->getMessage(), $e->getCode());
-        }
+        return new SituacoesCollectionResource(
+            resource: $situacoes
+        );
     }
 }
