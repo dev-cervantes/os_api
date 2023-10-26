@@ -26,7 +26,7 @@ class OsController extends Controller
 
     public function index(FilterRequest $request): OsCollectionResource
     {
-        $oss = Cache::remember(
+        $os = Cache::remember(
             key: "os_index_" . $request->collect()->transform(fn($value, $key) => "$key->$value")->values()->join('&'),
             ttl: 15,
             callback: function () use ($request) {
@@ -76,7 +76,10 @@ class OsController extends Controller
         );
 
         return new OsCollectionResource(
-            resource: $oss
+            resource: $os,
+            currentPage: $os->currentPage(),
+            perPage: $os->perPage(),
+            total: $os->total()
         );
     }
 
