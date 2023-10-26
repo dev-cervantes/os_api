@@ -10,16 +10,24 @@ use App\Models\EquipamentoItem;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class EquipamentoController extends Controller
 {
     public function index(): EquipamentoCollectionResource
     {
+        $equipamentos = Cache::remember(
+            key: "equipamento_index",
+            ttl: 60 * 2, // 2 minutos
+            callback: function () {
+                Equipamento::with(["itens" => fn($q) => $q->withoutGlobalScope(EquipamentoItem::scopeEquipamentoRelation)])
+                    ->orderBy("descricao")
+                    ->get();
+            });
+
         return new EquipamentoCollectionResource(
-            resource: Equipamento::with(["itens" => fn($q) => $q->withoutGlobalScope(EquipamentoItem::scopeEquipamentoRelation)])
-                ->orderBy("descricao")
-                ->get()
+            resource: $equipamentos
         );
     }
 
@@ -35,6 +43,8 @@ class EquipamentoController extends Controller
         }
 
         DB::commit();
+
+        Cache::forget("equipamento_index");
 
         return new EquipamentoResource(resource: $equipamento);
     }
