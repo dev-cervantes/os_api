@@ -21,7 +21,7 @@ class EquipamentoController extends Controller
             key: "equipamento_index",
             ttl: 60 * 2, // 2 minutos
             callback: function () {
-                Equipamento::with(["itens" => fn($q) => $q->withoutGlobalScope(EquipamentoItem::scopeEquipamentoRelation)])
+                return Equipamento::with(["itens" => fn($q) => $q->withoutGlobalScope(EquipamentoItem::scopeEquipamentoRelation)])
                     ->orderBy("descricao")
                     ->get();
             });
