@@ -23,11 +23,6 @@ class OsController extends Controller
 {
     const PAGINATOR_PER_PAGE_DEFAULT = 100;
 
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['liberar']]);
-    }
-
     public function index(FilterRequest $request): OsCollectionResource
     {
         $os = Cache::remember(
@@ -238,71 +233,66 @@ class OsController extends Controller
 
     public function liberar(Request $request): JsonResponse
     {
-        try {
-            //Valida e garante os dados recebidos pela requisição HTTP
-            $request->validate(['oss' => 'required|array', 'versao' => 'required|string', 'aplicativo' => 'required|string']);
+        //Valida e garante os dados recebidos pela requisição HTTP
+        $request->validate(['oss' => 'required|array', 'problema_constatado' => 'required|string']);
 
-            //retira o "OS" e espaços das Oss e converte para int
-            $reqOss = array();
+        $problemaConstatado = $request->get('problema_constatado');
 
-            foreach ($request->get('oss') as $os) {
-                $osInt = trim(str_replace("OS", "", $os));
-                $reqOss[] = (int)$osInt;
-            }
+        //retira o "OS" e espaços das Oss e converte para int
+        $reqOss = array();
 
-            //Busca todas as OS
-            $OSs = Os::query()->whereIn('os_codigo', $reqOss)->get();
-
-            //Inicia uma transação
-            DB::beginTransaction();
-
-            // Obtém a versão diretamente do request
-            $versao = $request->get('versao');
-
-
-            $OSs->each(function ($os) use ($request, $versao) {
-                //Faz as mudanças na OS
-                switch ($os->id_os_tipo_atendimento) {
-
-                    // tipo de atendimento 1 - novo cliente/novo piloto/novo parceiro
-                    case 29:
-                    case 36:
-                    case 37:
-                        $os->id_os_situacao = 12;
-                        break;
-
-                    // tipo de atendimento 2 - bug/bug critico
-                    case 30:
-                    case 39:
-                        $os->id_os_situacao = 26;
-                        break;
-
-                    // tipo de atendimento 4 - consultoria tributaria
-                    case 32:
-                        $os->id_os_situacao = 33;
-                        break;
-                }
-                // id - João
-                $os->id_usuario_responsavel = 25;
-                // Atualiza o problema_constatado na tabela OsEquipamentoItem
-                $os->equipamentosItens->each(function ($item) use ($versao, $request) {
-                    $item->problema_constatado = "Contemplada na versão " . "{$versao}" . " do " . "{$request->get('aplicativo')} " . "\n" . "{$item->problema_constatado}";
-
-                    $item->save();
-                });
-
-                //Salva a OS
-                $os->save();
-            });
-
-            DB::commit();
-            //Retorna vazio... o retorno no status 200 vai garantir sucesso.
-            return response()->json(["data" => "OS's liberadas com sucesso!"]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return response()->json(["error" => "Erro ao liberar as OS's."], 500);
+        foreach ($request->get('oss') as $os) {
+            $osInt = trim(str_replace("OS", "", $os));
+            $reqOss[] = (int)$osInt;
         }
 
+        //Busca todas as OS
+        $OSs = Os::query()->whereIn('os_codigo', $reqOss)->get();
+
+        //Inicia uma transação
+        DB::beginTransaction();
+
+        foreach ($OSs as $os) {
+            //Faz as mudanças na OS
+            switch ($os->id_os_tipo_atendimento) {
+                // tipo de atendimento 1 - novo cliente/novo piloto/novo parceiro
+                case 29:
+                case 36:
+                case 37:
+                    $os->id_os_situacao = 12;
+                    break;
+
+                // tipo de atendimento 2 - bug/bug critico
+                case 30:
+                case 39:
+                    $os->id_os_situacao = 26;
+                    break;
+
+                // tipo de atendimento 4 - consultoria tributaria
+                case 32:
+                    $os->id_os_situacao = 33;
+                    break;
+                default:
+                    continue 2;
+            }
+
+            // id - João
+            $os->id_usuario_responsavel = 25;
+
+            // Atualiza o problema_constatado na tabela OsEquipamentoItem
+            foreach ($os->equipamentosItens as $item) {
+                $item->problema_constatado = $problemaConstatado . "\n" . $item->problema_constatado;
+
+                $item->save();
+            }
+
+            //Salva a OS
+            $os->save();
+        }
+
+        DB::commit();
+
+        return response()->json(["data" => "OS's liberadas com sucesso."]);
     }
 
     public function destroy(int $id): JsonResponse
