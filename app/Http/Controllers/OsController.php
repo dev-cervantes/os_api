@@ -244,7 +244,7 @@ class OsController extends Controller
 
         foreach ($request->get('oss') as $os) {
             $osInt = trim(str_replace("OS", "", $os));
-            array_push($reqOss, (int)$osInt);
+            $reqOss[] = (int)$osInt;
         }
 
         //Busca todas as OS
@@ -258,7 +258,6 @@ class OsController extends Controller
 
 
         $OSs->each(function ($os) use ($request, $versao) {
-
             //Faz as mudanças na OS
             switch ($os->id_os_tipo_atendimento) {
 
@@ -280,11 +279,12 @@ class OsController extends Controller
                     $os->id_os_situacao = 33;
                     break;
             }
+            // id - João
             $os->id_usuario_responsavel = 25;
-
             // Atualiza o problema_constatado na tabela OsEquipamentoItem
             $os->equipamentosItens->each(function ($item) use ($versao, $request) {
-                $item->problema_constatado = "Contemplada na versão {$versao} do {$request->get('aplicativo')}\n{$item->problema_constatado}";
+                $item->problema_constatado = "Contemplada na versão " . "{$versao}" . " do " . "{$request->get('aplicativo')} " . "\n" . "{$item->problema_constatado}";
+
                 $item->save();
             });
 
@@ -293,9 +293,8 @@ class OsController extends Controller
         });
 
         DB::commit();
-
         //Retorna vazio... o retorno no status 200 vai garantir sucesso.
-        return response()->json([]);
+        return response()->json(["data"=>"OS's liberadas com sucesso!"]);
     }
 
     public function destroy(int $id): JsonResponse
