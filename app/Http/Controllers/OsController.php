@@ -12,7 +12,6 @@ use App\Models\Os;
 use App\Models\OsEquipamentoItem;
 use App\Models\OsProduto;
 use App\Models\OsServico;
-use App\Models\OsSituacao;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -230,6 +229,70 @@ class OsController extends Controller
         return new OsResource(
             resource: Os::allRelations()->find($id)
         );
+    }
+
+    public function liberar(Request $request): JsonResponse
+    {
+        //Valida e garante os dados recebidos pela requisição HTTP
+        $request->validate(['oss' => 'required|array', 'problema_constatado' => 'required|string']);
+
+        $problemaConstatado = $request->get('problema_constatado');
+
+        //retira o "OS" e espaços das Oss e converte para int
+        $reqOss = array();
+
+        foreach ($request->get('oss') as $os) {
+            $osInt = trim(str_replace("OS", "", $os));
+            $reqOss[] = (int)$osInt;
+        }
+
+        //Busca todas as OS
+        $OSs = Os::query()->whereIn('os_codigo', $reqOss)->get();
+
+        //Inicia uma transação
+        DB::beginTransaction();
+
+        foreach ($OSs as $os) {
+            //Faz as mudanças na OS
+            switch ($os->id_os_tipo_atendimento) {
+                // tipo de atendimento 1 - novo cliente/novo piloto/novo parceiro
+                case 29:
+                case 36:
+                case 37:
+                    $os->id_os_situacao = 12;
+                    break;
+
+                // tipo de atendimento 2 - bug/bug critico
+                case 30:
+                case 39:
+                    $os->id_os_situacao = 26;
+                    break;
+
+                // tipo de atendimento 4 - consultoria tributaria
+                case 32:
+                    $os->id_os_situacao = 33;
+                    break;
+                default:
+                    continue 2;
+            }
+
+            // id - João
+            $os->id_usuario_responsavel = 25;
+
+            // Atualiza o problema_constatado na tabela OsEquipamentoItem
+            foreach ($os->equipamentosItens as $item) {
+                $item->problema_constatado = $problemaConstatado . "\n" . $item->problema_constatado;
+
+                $item->save();
+            }
+
+            //Salva a OS
+            $os->save();
+        }
+
+        DB::commit();
+
+        return response()->json(["data" => "OS's liberadas com sucesso."]);
     }
 
     public function destroy(int $id): JsonResponse
