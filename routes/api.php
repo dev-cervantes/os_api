@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\EitiController;
 use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\OsController;
 use App\Http\Controllers\OsSituacaoController;
@@ -31,4 +32,5 @@ Route::middleware("auth:api")->group(function () {
     Route::apiResource("usuario", UsuarioController::class)->only(["index"]);
     Route::get("cliente/contains-name", [ClienteController::class, "containsName"]);
     Route::apiResource("cliente", ClienteController::class)->only(["show"]);
+    Route::apiResource("eiti/tarefa", EitiController::class)->only(["store"]);
 });

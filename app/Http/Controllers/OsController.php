@@ -12,7 +12,6 @@ use App\Models\Os;
 use App\Models\OsEquipamentoItem;
 use App\Models\OsProduto;
 use App\Models\OsServico;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

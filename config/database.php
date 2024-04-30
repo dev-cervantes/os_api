@@ -78,6 +78,21 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'pgsqlEiti' => [
+            'driver' => 'pgsql',
+            'url' => env('DATABASE_URL_EITI'),
+            'host' => env('DB_HOST_EITI', '127.0.0.1'),
+            'port' => env('DB_PORT_EITI', '5432'),
+            'database' => env('DB_DATABASE_EITI', 'forge'),
+            'username' => env('DB_USERNAME_EITI', 'forge'),
+            'password' => env('DB_PASSWORD_EITI', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),
