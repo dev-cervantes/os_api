@@ -32,5 +32,5 @@ Route::middleware("auth:api")->group(function () {
     Route::apiResource("usuario", UsuarioController::class)->only(["index"]);
     Route::get("cliente/contains-name", [ClienteController::class, "containsName"]);
     Route::apiResource("cliente", ClienteController::class)->only(["show"]);
-    Route::apiResource("TarefaEiti", EitiController::class)->only(["store"]);
+    Route::apiResource("eiti/tarefa", EitiController::class)->only(["store"]);
 });
