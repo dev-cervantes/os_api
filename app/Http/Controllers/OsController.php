@@ -253,27 +253,8 @@ class OsController extends Controller
 
         foreach ($OSs as $os) {
             //Faz as mudanças na OS
-            switch ($os->id_os_tipo_atendimento) {
-                // tipo de atendimento 1 - novo cliente/novo piloto/novo parceiro
-                case 29:
-                case 36:
-                case 37:
-                    $os->id_os_situacao = 12;
-                    break;
-
-                // tipo de atendimento 2 - bug/bug critico
-                case 30:
-                case 39:
-                    $os->id_os_situacao = 26;
-                    break;
-
-                // tipo de atendimento 4 - consultoria tributaria
-                case 32:
-                    $os->id_os_situacao = 33;
-                    break;
-                default:
-                    continue 2;
-            }
+            $os->id_os_situacao = 26;
+            
 
             // id - João
             $os->id_usuario_responsavel = 25;
