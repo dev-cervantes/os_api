@@ -252,10 +252,14 @@ class OsController extends Controller
         DB::beginTransaction();
 
         foreach ($OSs as $os) {
+            // Ignora se o usuário for diferente de Desenvolvimento, para não liberar mais de uma vez
+            if ($os->id_usuario_responsavel != 72) {
+                continue;
+            }
+
             //Faz as mudanças na OS
             $os->id_os_situacao = 26;
             
-
             // id - João
             $os->id_usuario_responsavel = 25;
 
