@@ -7,6 +7,7 @@ use App\Http\Requests\Os\OsStoreRequest;
 use App\Http\Requests\Os\OsUpdateRequest;
 use App\Http\Resources\Os\OsCollectionResource;
 use App\Http\Resources\Os\OsResource;
+use App\Http\Resources\Os\OsListResource;
 use App\Models\ConfigOs;
 use App\Models\Os;
 use App\Models\OsEquipamentoItem;
@@ -259,7 +260,7 @@ class OsController extends Controller
 
             //Faz as mudanças na OS
             $os->id_os_situacao = 26;
-            
+
             // id - João
             $os->id_usuario_responsavel = 25;
 
@@ -298,5 +299,18 @@ class OsController extends Controller
         if (is_null($os)) throw new BadRequestException("OS não encontrada!");
 
         return new OsResource(resource: $os);
+    }
+
+    public function listAll(Request $request)
+    {
+        $perPage = $request->get('per_page', 100);
+        $osCollection = Os::with([
+            'usuarioAtendente',
+            'equipamentosItens.equipamentoItem.equipamento'
+        ])->paginate($perPage);
+
+        return OsListResource::collection($osCollection)->additional([
+            'success' => true,
+        ]);
     }
 }
