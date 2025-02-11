@@ -9,7 +9,7 @@ class OsListResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id_os' => $this->os_codigo,
+            'codigo_os' => $this->os_codigo,
             'data-hora' => $this->data_hora->format('c'),
             'obs' => $this->obs,
             'usuario_atendente' => [
