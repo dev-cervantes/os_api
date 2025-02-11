@@ -301,13 +301,34 @@ class OsController extends Controller
         return new OsResource(resource: $os);
     }
 
-    public function listAll(Request $request)
+    public function listOrSearch(Request $request)
     {
-        $perPage = $request->get('per_page', 100);
-        $osCollection = Os::with([
+        $query = Os::with([
             'usuarioAtendente',
             'equipamentosItens.equipamentoItem.equipamento'
-        ])->paginate($perPage);
+        ]);
+
+        if ($termoBusca = $request->get('termoBusca')) {
+            $searchTerms = explode(' ', $termoBusca);
+
+            $query->where(function ($mainQuery) use ($searchTerms) {
+                foreach ($searchTerms as $term) {
+                    $mainQuery->where(function ($subQuery) use ($term) {
+                        $subQuery->orWhere('obs', 'LIKE', '%' . $term . '%')
+                            ->orWhereHas('usuarioAtendente', function ($query) use ($term) {
+                                $query->where('nome', 'LIKE', '%' . $term . '%');
+                            })
+                            ->orWhereHas('equipamentosItens', function ($query) use ($term) {
+                                $query->where('problema_reclamado', 'LIKE', '%' . $term . '%')
+                                    ->orWhere('problema_constatado', 'LIKE', '%' . $term . '%');
+                            });
+                    });
+                }
+            });
+        }
+
+        $perPage = $request->get('per_page', 100);
+        $osCollection = $query->paginate($perPage);
 
         return OsListResource::collection($osCollection)->additional([
             'success' => true,
