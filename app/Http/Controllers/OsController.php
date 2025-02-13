@@ -7,6 +7,7 @@ use App\Http\Requests\Os\OsStoreRequest;
 use App\Http\Requests\Os\OsUpdateRequest;
 use App\Http\Resources\Os\OsCollectionResource;
 use App\Http\Resources\Os\OsResource;
+use App\Http\Resources\Os\OsListResource;
 use App\Models\ConfigOs;
 use App\Models\Os;
 use App\Models\OsEquipamentoItem;
@@ -259,7 +260,7 @@ class OsController extends Controller
 
             //Faz as mudanças na OS
             $os->id_os_situacao = 26;
-            
+
             // id - João
             $os->id_usuario_responsavel = 25;
 
@@ -298,5 +299,39 @@ class OsController extends Controller
         if (is_null($os)) throw new BadRequestException("OS não encontrada!");
 
         return new OsResource(resource: $os);
+    }
+
+    public function listOrSearch(Request $request)
+    {
+        $query = Os::with([
+            'usuarioAtendente',
+            'equipamentosItens.equipamentoItem.equipamento'
+        ]);
+
+        if ($termoBusca = $request->get('termoBusca')) {
+            $searchTerms = explode(' ', $termoBusca);
+
+            $query->where(function ($mainQuery) use ($searchTerms) {
+                foreach ($searchTerms as $term) {
+                    $mainQuery->where(function ($subQuery) use ($term) {
+                        $subQuery->orWhere('obs', 'LIKE', '%' . $term . '%')
+                            ->orWhereHas('usuarioAtendente', function ($query) use ($term) {
+                                $query->where('nome', 'LIKE', '%' . $term . '%');
+                            })
+                            ->orWhereHas('equipamentosItens', function ($query) use ($term) {
+                                $query->where('problema_reclamado', 'LIKE', '%' . $term . '%')
+                                    ->orWhere('problema_constatado', 'LIKE', '%' . $term . '%');
+                            });
+                    });
+                }
+            });
+        }
+
+        $perPage = $request->get('per_page', 100);
+        $osCollection = $query->paginate($perPage);
+
+        return OsListResource::collection($osCollection)->additional([
+            'success' => true,
+        ]);
     }
 }
