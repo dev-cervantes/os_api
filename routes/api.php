@@ -19,9 +19,9 @@ Route::prefix("auth")->group(function () {
 });
 
 Route::post("os/liberar", [OsController::class, "liberar"]);
+Route::get("os/listar-ou-buscar", [OsController::class, "listOrSearch"]);
 
 Route::middleware("auth:api")->group(function () {
-    Route::get("os/listar-ou-buscar", [OsController::class, "listOrSearch"]);
 
     Route::apiResource("os", OsController::class)->except(["liberar"]);
     Route::get("os/codigo/{codigo}", [OsController::class, "getByCodigoOs"]);
