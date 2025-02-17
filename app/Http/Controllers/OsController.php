@@ -309,16 +309,16 @@ class OsController extends Controller
         ]);
 
         if ($termoBusca = $request->get('termoBusca')) {
-            $searchTerms = explode(' ', $termoBusca);
+            $searchTerms = explode(' ', trim($termoBusca));
 
             $query->where(function ($mainQuery) use ($searchTerms) {
                 foreach ($searchTerms as $term) {
                     $mainQuery->where(function ($subQuery) use ($term) {
-                        $subQuery->orWhereRaw('LOWER(obs) LIKE ?', ['%' . strtolower($term) . '%'])
+                        $subQuery->orWhereRaw('LOWER(obs) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
                             ->orWhere('os_codigo', 'LIKE', '%' . $term . '%')
                             ->orWhereHas('equipamentosItens', function ($query) use ($term) {
-                                $query->whereRaw('LOWER(problema_reclamado) LIKE ?', ['%' . strtolower($term) . '%'])
-                                    ->orWhereRaw('LOWER(problema_constatado) LIKE ?', ['%' . strtolower($term) . '%']);
+                                $query->whereRaw('LOWER(problema_reclamado) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
+                                    ->orWhereRaw('LOWER(problema_constatado) LIKE ?', ['%' . strtolower(trim($term)) . '%']);
                             });
                     });
                 }
@@ -332,5 +332,4 @@ class OsController extends Controller
             'success' => true,
         ]);
     }
-
 }
