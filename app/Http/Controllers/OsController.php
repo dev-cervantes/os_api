@@ -314,11 +314,11 @@ class OsController extends Controller
             $query->where(function ($mainQuery) use ($searchTerms) {
                 foreach ($searchTerms as $term) {
                     $mainQuery->where(function ($subQuery) use ($term) {
-                        $subQuery->orWhereRaw('LOWER(obs) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
+                        $subQuery->orWhereRaw('LOWER(TRIM(obs)) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
                             ->orWhere('os_codigo', 'LIKE', '%' . $term . '%')
                             ->orWhereHas('equipamentosItens', function ($query) use ($term) {
-                                $query->whereRaw('LOWER(problema_reclamado) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
-                                    ->orWhereRaw('LOWER(problema_constatado) LIKE ?', ['%' . strtolower(trim($term)) . '%']);
+                                $query->whereRaw('LOWER(TRIM(problema_reclamado)) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
+                                    ->orWhereRaw('LOWER(TRIM(problema_constatado)) LIKE ?', ['%' . strtolower(trim($term)) . '%']);
                             });
                     });
                 }
