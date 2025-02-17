@@ -309,19 +309,16 @@ class OsController extends Controller
         ]);
 
         if ($termoBusca = $request->get('termoBusca')) {
-            $searchTerms = explode(' ', $termoBusca);
+            $searchTerms = explode(' ', trim($termoBusca));
 
             $query->where(function ($mainQuery) use ($searchTerms) {
                 foreach ($searchTerms as $term) {
                     $mainQuery->where(function ($subQuery) use ($term) {
-                        $subQuery->orWhere('obs', 'LIKE', '%' . $term . '%')
+                        $subQuery->orWhereRaw('LOWER(TRIM(obs)) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
                             ->orWhere('os_codigo', 'LIKE', '%' . $term . '%')
-                            ->orWhereHas('usuarioAtendente', function ($query) use ($term) {
-                                $query->where('nome', 'LIKE', '%' . $term . '%');
-                            })
                             ->orWhereHas('equipamentosItens', function ($query) use ($term) {
-                                $query->where('problema_reclamado', 'LIKE', '%' . $term . '%')
-                                    ->orWhere('problema_constatado', 'LIKE', '%' . $term . '%');
+                                $query->whereRaw('LOWER(TRIM(problema_reclamado)) LIKE ?', ['%' . strtolower(trim($term)) . '%'])
+                                    ->orWhereRaw('LOWER(TRIM(problema_constatado)) LIKE ?', ['%' . strtolower(trim($term)) . '%']);
                             });
                     });
                 }
