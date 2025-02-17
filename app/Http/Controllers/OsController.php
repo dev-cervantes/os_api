@@ -315,6 +315,7 @@ class OsController extends Controller
                 foreach ($searchTerms as $term) {
                     $mainQuery->where(function ($subQuery) use ($term) {
                         $subQuery->orWhere('obs', 'LIKE', '%' . $term . '%')
+                            ->orWhere('os_codigo', 'LIKE', '%' . $term . '%')
                             ->orWhereHas('usuarioAtendente', function ($query) use ($term) {
                                 $query->where('nome', 'LIKE', '%' . $term . '%');
                             })
