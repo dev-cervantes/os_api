@@ -314,14 +314,11 @@ class OsController extends Controller
             $query->where(function ($mainQuery) use ($searchTerms) {
                 foreach ($searchTerms as $term) {
                     $mainQuery->where(function ($subQuery) use ($term) {
-                        $subQuery->orWhere('obs', 'LIKE', '%' . $term . '%')
+                        $subQuery->orWhereRaw('LOWER(obs) LIKE ?', ['%' . strtolower($term) . '%'])
                             ->orWhere('os_codigo', 'LIKE', '%' . $term . '%')
-                            ->orWhereHas('usuarioAtendente', function ($query) use ($term) {
-                                $query->where('nome', 'LIKE', '%' . $term . '%');
-                            })
                             ->orWhereHas('equipamentosItens', function ($query) use ($term) {
-                                $query->where('problema_reclamado', 'LIKE', '%' . $term . '%')
-                                    ->orWhere('problema_constatado', 'LIKE', '%' . $term . '%');
+                                $query->whereRaw('LOWER(problema_reclamado) LIKE ?', ['%' . strtolower($term) . '%'])
+                                    ->orWhereRaw('LOWER(problema_constatado) LIKE ?', ['%' . strtolower($term) . '%']);
                             });
                     });
                 }
@@ -335,4 +332,5 @@ class OsController extends Controller
             'success' => true,
         ]);
     }
+
 }
