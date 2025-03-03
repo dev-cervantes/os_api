@@ -326,7 +326,9 @@ class OsController extends Controller
         }
 
         $perPage = $request->get('per_page', 100);
-        $osCollection = $query->paginate($perPage);
+        $osCollection = $query
+            ->orderBy("os_codigo", "desc")
+            ->paginate($perPage);
 
         return OsListResource::collection($osCollection)->additional([
             'success' => true,
